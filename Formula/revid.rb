@@ -13,10 +13,10 @@ class Revid < Formula
   end
 
   depends_on arch: :arm64
-  depends_on :macos
   # revid takes ffmpeg and ffprobe from PATH when it finds them, instead of
   # downloading a static build on first use.
   depends_on "ffmpeg"
+  depends_on :macos
 
   def install
     # revid runs revid-agent from its own folder.
