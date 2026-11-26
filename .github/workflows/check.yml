@@ -1,0 +1,38 @@
+name: Check
+
+# The recipes pass Homebrew's own checks and install. Runs on every push,
+# including the release jobs' updates, and on pull requests.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: check-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: macos-15
+    timeout-minutes: 30
+    steps:
+      # Taps this repository as everloud/tap at the commit being checked.
+      - uses: Homebrew/actions/setup-homebrew@main
+
+      - run: brew style everloud/tap
+      - run: brew audit --strict --online --tap everloud/tap
+
+      - name: Install and test the formula
+        run: |
+          brew install everloud/tap/revid
+          brew test everloud/tap/revid
+          brew linkage everloud/tap/revid
+
+      - name: Install the cask
+        run: |
+          brew install --cask everloud/tap/revid-tagger
+          spctl --assess --type execute --verbose=2 "/Applications/revid tagger.app"
